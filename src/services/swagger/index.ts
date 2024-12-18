@@ -3,16 +3,26 @@
 // API 更新时间：
 // API 唯一标识：
 import * as wxMpController from './wxMpController';
-import * as fileController from './fileController';
-import * as postController from './postController';
-import * as postFavourController from './postFavourController';
-import * as postThumbController from './postThumbController';
+import * as deptController from './deptController';
+import * as detailsController from './detailsController';
+import * as dictDataController from './dictDataController';
+import * as dictTypeController from './dictTypeController';
+import * as hisHttpController from './hisHttpController';
+import * as roomController from './roomController';
+import * as seatController from './seatController';
+import * as sourceController from './sourceController';
+import * as templateController from './templateController';
 import * as userController from './userController';
 export default {
   wxMpController,
-  fileController,
-  postController,
-  postFavourController,
-  postThumbController,
+  deptController,
+  detailsController,
+  dictDataController,
+  dictTypeController,
+  hisHttpController,
+  roomController,
+  seatController,
+  sourceController,
+  templateController,
   userController,
 };

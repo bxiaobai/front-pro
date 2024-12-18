@@ -1,6 +1,6 @@
-﻿import type { RequestConfig, RequestOptions } from '@@/plugin-request/request';
-import {getToken} from "../utils/auth";
+﻿import type {RequestConfig, RequestOptions} from '@@/plugin-request/request';
 import {BACKEND_HOST_LOCAL, BACKEND_HOST_PROD} from "@/constants";
+import {message} from "antd";
 
 // 与后端约定的响应数据格式
 interface ResponseStructure {
@@ -34,9 +34,8 @@ export const errorConfig: RequestConfig = {
       // 响应
       const { data } = response as unknown as ResponseStructure;
       if (!data) {
-        throw new Error('服务异常');
+        message.error(data.message);
       }
-
       // 错误码处理
       const code: number = data.code;
       // 未登录，且不为获取用户登录信息接口
@@ -51,7 +50,7 @@ export const errorConfig: RequestConfig = {
       }
 
       if (code !== 0) {
-        throw new Error(data.message ?? '服务器错误');
+        message.error(data.message);
       }
       return response;
     },

@@ -1,4 +1,4 @@
-import {LogoutOutlined, SmileFilled, SmileOutlined} from '@ant-design/icons';
+import {LogoutOutlined, SmileOutlined} from '@ant-design/icons';
 import {history, useModel} from '@umijs/max';
 import {Spin} from 'antd';
 import {createStyles} from 'antd-style';
@@ -103,7 +103,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({menu, children
   const menuItems = [
     {
       key: 'account',
-      icon: <SmileOutlined />,
+      icon: <SmileOutlined/>,
       label: '个人中心',
     },
     {

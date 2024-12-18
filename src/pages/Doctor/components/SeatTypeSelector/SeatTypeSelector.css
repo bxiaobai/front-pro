@@ -1,0 +1,35 @@
+/* src/pages/Doctor/components/SeatTypeSelector.css */
+.seat-type-selector {
+  margin-bottom: 16px;
+}
+
+.seat-type-header {
+  display: flex;
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  font-weight: bold;
+}
+
+.seat-types {
+  display: flex;
+  flex-direction: column; /* 将布局改为竖排 */
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%; /* 设置宽度为100% */
+}
+
+.seat-type {
+  padding: 8px 16px;
+  background: #f0f1f3;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  width: 100%; /* 设置宽度为100% */
+}
+
+.seat-type.selected {
+  background-color: #1890ff;
+  color: #fff;
+}

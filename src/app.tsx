@@ -7,14 +7,8 @@ import {errorConfig} from './requestConfig';
 import React, {useState} from 'react';
 import {getLoginUserUsingGet} from "@/services/swagger/userController";
 import defaultSettings from "../config/defaultSettings";
-import {Button} from "antd";
-import {
-  GithubFilled,
-  InfoCircleFilled,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  QuestionCircleFilled
-} from "@ant-design/icons";
+import {Button, message} from "antd";
+import {MenuFoldOutlined, MenuUnfoldOutlined} from "@ant-design/icons";
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -35,6 +29,7 @@ export async function getInitialState(): Promise<InitialState> {
       initialState.currentUser = res.data;
     } catch (error: any) {
       //如果未登录，重定向到登录页
+      message.error('未登录')
       history.push(loginPath)
     }
   }
@@ -50,9 +45,17 @@ export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => 
         if (props.isMobile) return [];
         if (typeof window === 'undefined') return [];
         return [
-          <InfoCircleFilled key="InfoCircleFilled"/>,
-          <QuestionCircleFilled key="QuestionCircleFilled"/>,
-          <GithubFilled key="GithubFilled"/>,
+          <>
+            <span style={{fontSize: '14px'}}>所属科室：</span>
+            <span style={{
+              marginRight: 8,
+              color: '#666',
+              fontWeight: 'bold',
+              fontSize: '14px',
+            }} key={'dept'}>
+              {initialState?.currentUser?.deptName}
+            </span>
+          </>
         ];
       },
       avatarProps: {

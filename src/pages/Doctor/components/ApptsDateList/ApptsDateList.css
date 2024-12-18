@@ -1,0 +1,59 @@
+.appointment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 调整间距 */
+}
+
+.appointment-item {
+  display: flex;
+  padding: 8px;
+  background: #f0f1f3;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.appointment-header {
+  display: flex;
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  font-weight: bold;
+}
+
+.appointment-item.selected {
+  background-color: #1890ff;
+  color: #fff;
+}
+
+.appointment-item .white {
+  color: #fff;
+}
+
+.appointment-column {
+  flex: 1;
+}
+/* 为每个列设置不同的 flex 值 */
+.appointment-column.time {
+  flex: 1;
+}
+
+.appointment-column.booked-total {
+  flex: 2;
+}
+
+.appointment-column.remaining {
+  flex: 1;
+}
+
+.appointment-column.source-pool {
+  flex: 2;
+}
+.red {
+  color: red;
+}
+
+.blue {
+  color: blue;
+}
