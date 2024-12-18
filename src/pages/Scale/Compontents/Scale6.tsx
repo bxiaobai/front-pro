@@ -3,7 +3,7 @@ import {useParams} from "@@/exports";
 import React, {useState} from "react";
 import {useLocation} from "@umijs/max";
 import {Button, Card, message, Tag} from "antd";
-import {addUsingPost} from "@/services/swagger/appointmentScaleController";
+import {addUsingPost} from "@/services/swagger/scaleController";
 
 const SysMenu: React.FC = () => {
   const location = useLocation();
@@ -25,7 +25,7 @@ const SysMenu: React.FC = () => {
 
     try {
       const res = await addUsingPost({
-        resId: id,
+        detailsId: id,
         tag: 6,
         scaleJson: JSON.stringify(values),
         scaleSuggest: selectedLength < 2 || selectedLength === 0 ? '您不存在呕吐风险；' : '您属于呕吐高危患者，遵医嘱在每次抗肿瘤药物开始前使用止吐药且覆盖整个风险期。'

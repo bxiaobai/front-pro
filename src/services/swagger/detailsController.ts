@@ -17,6 +17,30 @@ export async function createDetailsUsingPost(
   });
 }
 
+/** 自动选择医嘱时间和座位 POST /api/details/auto/select */
+export async function autoSelectUsingPost(body: API.AutoRequest, options?: { [key: string]: any }) {
+  return request<API.BaseResponseAutoVO_>('/api/details/auto/select', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 计算药品所需时间 POST /api/details/count/drug/time */
+export async function countDrugTimeUsingPost(body: API.Yzxxs[], options?: { [key: string]: any }) {
+  return request<API.BaseResponseInt_>('/api/details/count/drug/time', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 取消预约 GET /api/details/delete */
 export async function removeDetailsUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)

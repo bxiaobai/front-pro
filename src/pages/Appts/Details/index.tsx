@@ -2,7 +2,7 @@ import {PlusOutlined} from '@ant-design/icons';
 import type {ActionType, ProColumns, ProFormInstance} from '@ant-design/pro-components';
 import {PageContainer, ProTable} from '@ant-design/pro-components';
 import '@umijs/max';
-import {Button, message, Popconfirm, Space, Tag, Typography} from 'antd';
+import {Button, message, Popconfirm, Popover, Space, Tag, Typography} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
 import CreateModal from "@/pages/Appts/Template/components/CreateModal";
 import UpdateModal from "@/pages/Appts/Template/components/UpdateModal";
@@ -10,7 +10,7 @@ import InfoModal from "@/pages/Appts/Template/components/InfoModal";
 import {deleteTemplateUsingGet} from "@/services/swagger/templateController";
 import {listRoomAllUsingGet} from "@/services/swagger/roomController";
 import CreateSource from "@/pages/Appts/Template/components/CreateSource";
-import {listDetailsPageUsingPost} from "@/services/swagger/detailsController";
+import {listDetailsPageUsingPost, removeDetailsUsingGet} from "@/services/swagger/detailsController";
 import {history} from "@umijs/max";
 import {formatDateToYYYYMMDD} from "@/utils/date";
 
@@ -54,16 +54,16 @@ const UserAdminPage: React.FC = () => {
     const hide = message.loading('正在删除');
     if (!row) return true;
     try {
-      await deleteTemplateUsingGet({
+      await removeDetailsUsingGet({
         id: row.id as any,
       });
       hide();
-      message.success('删除成功');
+      message.success('取消成功');
       actionRef?.current?.reload();
       return true;
     } catch (error: any) {
       hide();
-      message.error('删除失败，' + error.message);
+      message.error('取消失败，' + error.message);
       return false;
     }
   };
@@ -84,14 +84,14 @@ const UserAdminPage: React.FC = () => {
       title: '患者姓名',
       dataIndex: 'patName',
       order: 1,
-      width : 100,
+      width: 100,
       fixed: 'left',
     },
     {
       title: '卡号',
       dataIndex: 'card',
       order: 2,
-      width : 100,
+      width: 100,
       //展示？
 
       fixed: 'left',
@@ -101,7 +101,7 @@ const UserAdminPage: React.FC = () => {
       dataIndex: 'date',
       valueType: 'date',
       //默认获取转换时间
-      initialValue : formatDateToYYYYMMDD(new Date()) ,
+      initialValue: formatDateToYYYYMMDD(new Date()),
       fieldProps: {
         format: 'YYYY-MM-DD',
         onChange: (date: any, dateString: any) => {
@@ -110,7 +110,7 @@ const UserAdminPage: React.FC = () => {
         }
       },
       order: 3,
-      width : 100,
+      width: 100,
       fixed: 'left',
     },
     {
@@ -121,7 +121,7 @@ const UserAdminPage: React.FC = () => {
       hideInSearch: true,
       hideInForm: true,
       fixed: 'left',
-      width : 150
+      width: 150
     },
     {
       title: '预约时间',
@@ -133,7 +133,7 @@ const UserAdminPage: React.FC = () => {
         <Tag color={'blue'}>{record?.time?.split(",")[0]}</Tag>
       ),
       fixed: 'left',
-      width : 100
+      width: 100
     },
 
     {
@@ -147,11 +147,11 @@ const UserAdminPage: React.FC = () => {
         })),
       },
       render: (_, record) => (
-        <span >
+        <span>
           {allRoom?.find(item => item.id === record.irId)?.irName}
         </span>
       ),
-      width : 150
+      width: 150
     },
     {
       title: '座位号',
@@ -161,7 +161,7 @@ const UserAdminPage: React.FC = () => {
       render: (_, record) => (
         <Tag color={record.seatNum ? 'green' : 'red'}>{record.seatNum ? record.seatNum : '未分配座位'}</Tag>
       ),
-      width : 100
+      width: 100
     },
     {
       title: '状态',
@@ -171,7 +171,7 @@ const UserAdminPage: React.FC = () => {
       fixed: 'left',
       valueEnum: {
         //   状态(0未分配座位,1已分配座位,2已完成,3进行中)
-        0 :{
+        0: {
           text: '已预约',
           status: 'Success',
         },
@@ -201,23 +201,40 @@ const UserAdminPage: React.FC = () => {
         },
       },
       hideInForm: true,
-      width : 100
+      width: 100
     },
     {
       title: '操作',
       dataIndex: 'option',
-      width : 300,
+      width: 300,
       fixed: 'right',
       valueType: 'option',
       render: (_, record) => (
         <Space size="middle">
-          <Typography.Link
-            onClick={() => {
-              history.push(`/appointment/list/scale/` + record.id);
-            }}
-          >
-            预约
-          </Typography.Link>
+          {/*如果状态等于0显示预约*/}
+          {record.status === 0 ? (
+            <Typography.Link
+              onClick={() => {
+                history.push(`/list/add `, {id: record.id});
+              }}
+            >
+              预约
+            </Typography.Link>
+          ) : <></>}
+          {record.status === 1 ? (
+            <Popover
+              content={'到诊后显示打印按钮'}
+              placement="top"
+            >
+              <Typography.Link
+                onClick={() => {
+                  history.push(`/appointment/list/scale/` + record.id);
+                }}
+              >
+                打印
+              </Typography.Link>
+            </Popover>
+          ) : <></>}
           <Typography.Link
             onClick={() => {
               history.push(`/appointment/list/scale/` + record.id);
@@ -231,28 +248,23 @@ const UserAdminPage: React.FC = () => {
               setUpdateModalVisible(true);
             }}
           >
-            详情
-          </Typography.Link>
-          <Typography.Link
-            onClick={() => {
-              setCurrentRow(record);
-              setUpdateModalVisible(true);
-            }}
-          >
             分配座位
           </Typography.Link>
-          <Popconfirm
-            title="取消预约？"
-            description="确认取消预约？"
-            onConfirm={() => handleDelete(record)}
-            onCancel={() => message.info('取消操作')}
-            okText="是"
-            cancelText="否"
-          >
-            <Typography.Link type="danger">
-              取消
-            </Typography.Link>
-          </Popconfirm>
+          {record.status !== 1 || 4 || 5 || 6 || 7 ? (
+            <Popconfirm
+              title="取消预约？"
+              description="确认取消预约？"
+              onConfirm={() => handleDelete(record)}
+              onCancel={() => message.info('取消操作')}
+              okText="是"
+              cancelText="否"
+            >
+              <Typography.Link type="danger">
+                取消
+              </Typography.Link>
+            </Popconfirm>
+          ) : <></>}
+
 
         </Space>
       ),
@@ -281,7 +293,7 @@ const UserAdminPage: React.FC = () => {
           </Button>,
 
         ]}
-        scroll={{ x: 'max-content' }}
+        scroll={{x: 'max-content'}}
         request={async (params, sort, filter) => {
           const sortField = Object.keys(sort)?.[0];
           const sortOrder = sort?.[sortField] ?? undefined;
@@ -290,7 +302,7 @@ const UserAdminPage: React.FC = () => {
             sortField,
             sortOrder,
             ...filter,
-            date : formRef.current?.getFieldValue("date")
+            date: formRef.current?.getFieldValue("date")
           } as API.DetailsQueryRequest);
           return {
             success: code === 0,

@@ -3,7 +3,7 @@ import {useParams} from "@@/exports";
 import React, {useEffect, useState} from "react";
 import {useLocation} from "@umijs/max";
 import {Button, Card, message, Tag} from "antd";
-import {addUsingPost} from "@/services/swagger/appointmentScaleController";
+import {addUsingPost} from "@/services/swagger/scaleController";
 
 const SysMenu: React.FC = () => {
   const location = useLocation();
@@ -38,7 +38,7 @@ const SysMenu: React.FC = () => {
   //提交方法
   const handleSubmit = async (values) => {
     try {
-      const res = await addUsingPost({resId: id, tag: 4, scaleJson: JSON.stringify(values)});
+      const res = await addUsingPost({detailsId: id, tag: 4, scaleJson: JSON.stringify(values)});
       if (res.data) {
         message.success('提交成功');
         history.back()

@@ -10,75 +10,90 @@ import DateForm from "@/pages/Appts/Details/AddDetails/components/DateForm";
 import {formatDateToYYYYMMDD} from "@/utils/date";
 import {useModel} from "@@/exports";
 import {listSeatAllUsingGet} from "@/services/swagger/seatController";
-import {createDetailsUsingPost} from "@/services/swagger/detailsController";
-import {history} from "@umijs/max"; // 假设存在这个 API 方法
+import {
+  autoSelectUsingPost,
+  countDrugTimeUsingPost,
+  createDetailsUsingPost,
+  getDetailsByIdUsingGet
+} from "@/services/swagger/detailsController";
+import {history, useLocation} from "@umijs/max";
 
-/**
- *
- * @constructor
- */
 const UserAdminPage: React.FC = () => {
-  // 进入页面时加载对应的信息
   const {initialState} = useModel('@@initialState');
-  // 定义回调函数来处理选中的时间数据
   const [selectedTimes, setSelectedTimes] = useState<API.SourceApptsVO[]>([]);
   const [type, setType] = useState<number>(0);
-  const [date, setDate] = useState<string>(formatDateToYYYYMMDD(Date.now()));
-  // 服务端获取到的时间列表
+  const [date, setDate] = useState<string>();
   const [times, setTimes] = useState<API.SourceApptsVO[]>([]);
   const [seatList, setSeatList] = useState<API.SeatLayoutVO[]>([]);
   const [selectedSeat, setSelectedSeat] = useState<API.SeatVO | null>(null);
-  // 推荐的时间
-  const [recommendedTimes, setRecommendedTimes] = useState<{ id: number, time: string }[]>([]);
-  //预约的药品信息
   const [selectedDrugs, setSelectedDrugs] = useState<API.IrStrListVO[]>([]);
-  //预约的患者信息
-  const [patientInfo, setPatientInfo] = useState<API.Brxx>()
+  const [patientInfo, setPatientInfo] = useState<API.PatVO | undefined>(undefined);
+
   const handleSelectTime = (selectedTimes: { id: number, time: string }[], type: number, date: string) => {
     setSelectedTimes(selectedTimes);
     setType(type);
     setDate(date);
   };
 
+  const location: any = useLocation();
+
+  useEffect(() => {
+    if (location.state?.id !== undefined) {
+      console.log(location.state.id)
+      getDetailsByIdUsingGet({id: location.state.id})
+        .then(res => {
+          if (res.data) {
+            // 假设 res.data 包含所有需要的状态信息
+            setPatientInfo({
+              ...res.data,
+            });
+            //传递时间
+            setDate(res.data.date);
+            if (res.data?.irStrListVO) {
+              setSelectedDrugs(prevDrugs => [...prevDrugs, ...res?.data?.irStrListVO ?? []]);
+            }
+            // 使用可选链操作符和空值合并操作符
+            const sourceIds = res.data.sourceId?.split(",") ?? [];
+            const times = res.data.time?.split(",") ?? [];
+            const newSelectedTimes = sourceIds.map((id, index) => ({
+              id: Number(id),
+              time: times[index] ?? "" // 根据索引获取对应的 time，如果不存在则使用空字符串
+            }));
+            setSelectedTimes([...newSelectedTimes]);
+            // setType(0);
+            setSelectedSeat({
+              id: res.data?.seatId as number,
+              irId: initialState?.currentUser?.deptId
+            });
+          }
+        })
+
+    }
+  }, [location.state?.id]);
+
   const handleSeatSelect = (seat: API.SeatVO) => {
     setSelectedSeat(seat);
-    console.log('Selected Seat:', seat);
   };
 
   const handleSearch = (values: any) => {
-    // 假设 values 中包含药品信息和开始时间
-    setSelectedDrugs(values.selectedDrugs)
-    setPatientInfo(values.patientInfo)
-    // const { medicine, startTime } = values;
-    // // 根据药品和开始时间计算推荐的时间
-    // const recommended = calculateRecommendedTimes(times, medicine, startTime);
-    // setRecommendedTimes(recommended);
+    setSelectedDrugs(values.selectedDrugs);
+    setPatientInfo(values.patientInfo);
+
   };
 
-  // 初始化时间
   useEffect(() => {
-    const currentDate = formatDateToYYYYMMDD(Date.now());
-    listSourceUsingPost({date: currentDate})
+    listSourceUsingPost({date: date})
       .then(res => {
-        if (res.data) {
-          setTimes(res.data);
-        } else {
-          setTimes([]);
-        }
+        setTimes(res.data ?? []);
       })
-      .catch(error => {
-        console.error('Error fetching time data:', error);
-      });
   }, [date]);
 
-  // 初始化座位
   useEffect(() => {
-    listSeatAllUsingGet({id: initialState?.currentUser?.deptId as number}).then(res => {
+    listSeatAllUsingGet({id: initialState?.currentUser?.deptId as number, date: date as string}).then(res => {
       setSeatList(res.data ?? []);
     });
   }, [type, date]);
 
-  // 提交处理函数
   const handleSubmit = async () => {
     if (!selectedTimes || selectedTimes.length === 0) {
       message.error('请选择时间');
@@ -89,35 +104,78 @@ const UserAdminPage: React.FC = () => {
       return;
     }
     const appointmentData: API.DetailsAddRequest = {
+      id: location.state?.id,
       date: date,
       type: type,
-      irId: 9,
+      irId: initialState?.currentUser?.deptId,
       phone: '16639579302',
       saveFlag: 0,
-      card: patientInfo?.blh,
-      times: selectedTimes.map(item => item.time) as string[], // 将时间数组转换为逗号分隔的字符串
-      sourceId: selectedTimes.map(item => item.id).join(','), //
+      card: patientInfo?.card,
+      times: selectedTimes.map(item => item.time) as string[],
+      sourceId: selectedTimes.map(item => item.id).join(','),
       irStrListVO: selectedDrugs,
-      patName: patientInfo?.brxm,
+      patName: patientInfo?.name,
       seatNum: selectedSeat.seatNumber,
       seatType: selectedSeat.flag,
       seatId: selectedSeat.id,
-
-      // 其他需要的信息
     };
-    const res = await createDetailsUsingPost(appointmentData)
+    const res = await createDetailsUsingPost(appointmentData);
     if (res.code === 0) {
       message.success('预约成功');
       history.push('/list');
     }
-
   };
 
+  //自动计算时间方法
+  const [totalTime, setTotalTime] = useState<number>()
+  //总需要时间
+  const recalculateRecommendedTimes = async (yzxxs: API.Yzxxs[]) => {
+    const res = await countDrugTimeUsingPost(yzxxs)
+    setTotalTime(res.data)
+    message.success('所需时间大约' + res.data + '小时')
+  }
+  //自动计算时间
+  const handleAuto = async () => {
+    console.log(selectedTimes)
+    const min = Math.min(...selectedTimes.map(item => parseInt(item.time as string, 10))).toString().padStart(2, '0')
+    console.log(min)
+    const data: API.AutoRequest = {
+      date: date,
+      irId: initialState?.currentUser?.deptId,
+      totalTime: totalTime,
+      startTime: min === 'Infinity' ? '08' : min,
+    }
+    const res = await autoSelectUsingPost(data)
+    // 假设 sourceId 和 time 可以有默认值
+
+    // 使用可选链操作符和空值合并操作符
+    const newSelectedTimes = res.data?.sourceId.map((id) => ({
+      id: Number(id),
+      time: "" // 根据索引获取对应的 time，如果不存在则使用空字符串
+    }));
+    setSelectedTimes([...newSelectedTimes as any]);
+    setSelectedSeat({
+      id: res.data?.seatId as number,
+      irId: initialState?.currentUser?.deptId
+    })
+  }
+  useEffect(() => {
+    if (selectedDrugs.length > 0) {
+      recalculateRecommendedTimes(selectedDrugs[0].yzxxsList as API.Yzxxs[])
+    }
+  }, [selectedDrugs])
+  useEffect(() => {
+    if (totalTime) {
+      handleAuto()
+    }
+  }, [totalTime])
   return (
     <PageContainer
       footer={[
         <Button key="3" onClick={() => {
-          // 重置逻辑
+          console.log(selectedDrugs)
+        }}>查看药品</Button>,
+        <Button key="3" onClick={() => {
           setSelectedTimes([]);
           setSelectedSeat(null);
           setDate(formatDateToYYYYMMDD(Date.now()));
@@ -128,14 +186,16 @@ const UserAdminPage: React.FC = () => {
         </Button>,
       ]}>
       <Flex vertical gap={8}>
-        {/* 头部搜索 */}
-        <SearchForm onSearch={handleSearch}/>
+        <SearchForm patInfo={patientInfo ?? {}} onSearch={handleSearch}/>
         <Card>
-          {/* 选择时间 */}
-          <DateForm onSelectTime={handleSelectTime} times={times} recommendedTimes={recommendedTimes}/>
+          <DateForm
+            selectedTime={selectedTimes}
+            data={date as string}
+            onSelectTime={handleSelectTime}
+            times={times}
+          />
           <Divider/>
-          {/* 选择座位 */}
-          <SeatForm seatList={seatList} onSeatClick={handleSeatSelect}/>
+          <SeatForm selectedSeatId={selectedSeat?.id} seatList={seatList} onSeatClick={handleSeatSelect}/>
         </Card>
       </Flex>
     </PageContainer>

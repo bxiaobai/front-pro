@@ -33,6 +33,24 @@ declare namespace API {
     id?: number;
   };
 
+  type AutoRequest = {
+    date?: string;
+    irId?: number;
+    startTime?: string;
+    totalTime?: number;
+  };
+
+  type AutoVO = {
+    seatId?: number;
+    sourceId?: number[];
+  };
+
+  type BaseResponseAutoVO_ = {
+    code?: number;
+    data?: AutoVO;
+    message?: string;
+  };
+
   type BaseResponseBoolean_ = {
     code?: number;
     data?: boolean;
@@ -60,6 +78,12 @@ declare namespace API {
   type BaseResponseDictTypeVO_ = {
     code?: number;
     data?: DictTypeVO;
+    message?: string;
+  };
+
+  type BaseResponseInt_ = {
+    code?: number;
+    data?: number;
     message?: string;
   };
 
@@ -96,6 +120,12 @@ declare namespace API {
   type BaseResponseListRoomVO_ = {
     code?: number;
     data?: RoomVO[];
+    message?: string;
+  };
+
+  type BaseResponseListScale_ = {
+    code?: number;
+    data?: Scale[];
     message?: string;
   };
 
@@ -340,6 +370,8 @@ declare namespace API {
     card?: string;
     date?: string;
     drugList?: Drug[];
+    editUserId?: number;
+    id?: number;
     irId?: number;
     irStrListVO?: IrStrListVO[];
     patName?: string;
@@ -377,7 +409,10 @@ declare namespace API {
     drugList?: Drug;
     id?: number;
     irId?: number;
+    irStrListVO?: IrStrListVO[];
     patName?: string;
+    phone?: string;
+    seatId?: number;
     seatNum?: string;
     seatType?: string;
     sourceId?: string;
@@ -549,6 +584,16 @@ declare namespace API {
     id: number;
   };
 
+  type getScaleByCardIdUsingGETParams = {
+    /** scaleId */
+    scaleId: number;
+  };
+
+  type getScaleUsingGETParams = {
+    /** scaleId */
+    scaleId: number;
+  };
+
   type getSeatByIdUsingGETParams = {
     /** id */
     id: number;
@@ -593,6 +638,8 @@ declare namespace API {
   };
 
   type listSeatAllUsingGETParams = {
+    /** date */
+    date: string;
     /** id */
     id: number;
   };
@@ -777,6 +824,16 @@ declare namespace API {
     status?: number;
   };
 
+  type Scale = {
+    createDate?: string;
+    detailsId?: number;
+    result?: string;
+    scaleId?: number;
+    scaleJson?: string;
+    scaleSuggest?: string;
+    tag?: number;
+  };
+
   type SeatAddRequest = {
     area?: string;
     flag?: string;
@@ -858,7 +915,7 @@ declare namespace API {
   type SourceQueryRequest = {
     current?: number;
     date?: string;
-    irId?: string;
+    irId?: number;
     pageSize?: number;
     sortField?: string;
     sortOrder?: string;

@@ -1,25 +1,34 @@
-import React, { useState } from "react";
-import { Button, Card, Col, Flex, Form, Input, Row } from "antd";
+import React, {useEffect, useState} from "react";
+import {Button, Card, Col, Form, Input, Row} from "antd";
 import PatientInfoModal from "./PatientInfoModal";
-import { getIrInfoUsingGet, getPatInfoUsingGet } from "@/services/swagger/hisHttpController"; // 引入新的 Modal 组件
+import {getIrInfoUsingGet, getPatInfoUsingGet} from "@/services/swagger/hisHttpController"; // 引入新的 Modal 组件
 
 interface Props {
   onSearch: (values: any) => void;
+  patInfo: API.PatVO;
 }
 
-const SearchForm: React.FC<Props> = ({ onSearch }) => {
+const SearchForm: React.FC<Props> = ({ onSearch , patInfo }) => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [patientInfo, setPatientInfo] = useState<API.IrStrListVO[]>([]);
-  const [selectedMedicines, setSelectedMedicines] = useState<string[]>([]);
+  const [irStrListVO, setIrStrListVO] = useState<API.IrStrListVO[]>([]);
   // 患者信息
-  const [pat, setPatInfo] = useState<API.Brxx>({});
-
+  const [pat, setPatInfo] = useState<API.PatVO>({...patInfo});
+  console.log('patInfo', pat)
   const showModal = () => {
     setIsModalVisible(true);
   };
 
-  const handleOk = (selectedDrugs: API.IrStrListVO[], patientInfo: API.Brxx) => {
+  useEffect(() => {
+    // 当 patInfo 发生变化时，更新 pat 状态
+    setPatInfo(patInfo);
+    form.setFieldsValue({
+      phoneNumber: patInfo.phone,
+      cardNumber: patInfo.card,
+    });
+  }, [patInfo, form]);
+
+  const handleOk = (selectedDrugs: API.IrStrListVO[], patientInfo: API.PatVO) => {
     setIsModalVisible(false);
     // 传递患者信息和选择的药品数据
     onSearch({ patientInfo, selectedDrugs });
@@ -35,9 +44,9 @@ const SearchForm: React.FC<Props> = ({ onSearch }) => {
     // 患者信息
     const resPat = await getPatInfoUsingGet({ medicalNumber: values.cardNumber });
     setPatInfo(resPat.data ?? {});
-    setPatientInfo(res.data ?? []);
+    setIrStrListVO(res.data ?? []);
     showModal();
-    form.setFieldValue("phoneNumber", resPat?.data?.lxdh);
+    form.setFieldValue("phoneNumber", resPat?.data?.card);
   };
 
   return (
@@ -47,7 +56,7 @@ const SearchForm: React.FC<Props> = ({ onSearch }) => {
           <Form
             layout={'inline'}
             form={form}
-            initialValues={{ layout: 'inline'  , phoneNumber : pat.lxfs}}
+            initialValues={{ layout: 'inline'  , phoneNumber : pat.phone , cardNumber : pat.card}}
             onFinish={onFinish}
           >
             <Form.Item name="cardNumber" label="卡号" rules={[{ required: true, message: '请输入卡号' }]}>
@@ -78,7 +87,7 @@ const SearchForm: React.FC<Props> = ({ onSearch }) => {
         onCancel={handleCancel}
         onOk={handleOk}
         patientInfo={pat}
-        drugs={patientInfo}
+        drugs={irStrListVO}
       />
     </Card>
   );

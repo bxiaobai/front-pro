@@ -42,14 +42,14 @@ export async function getSeatByIdUsingGet(
   });
 }
 
-/** 获取全部座位 GET /api/seat/list/map/${param0} */
+/** 获取全部座位 GET /api/seat/list/map/${param1}/${param0} */
 export async function listSeatAllUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.listSeatAllUsingGETParams,
   options?: { [key: string]: any },
 ) {
-  const { id: param0, ...queryParams } = params;
-  return request<API.BaseResponseListSeatLayoutVO_>(`/api/seat/list/map/${param0}`, {
+  const { date: param0, id: param1, ...queryParams } = params;
+  return request<API.BaseResponseListSeatLayoutVO_>(`/api/seat/list/map/${param1}/${param0}`, {
     method: 'GET',
     params: { ...queryParams },
     ...(options || {}),

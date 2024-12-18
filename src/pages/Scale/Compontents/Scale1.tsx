@@ -3,6 +3,7 @@ import {useParams} from "@@/exports";
 import React from "react";
 import {useLocation} from "@umijs/max";
 import {Button, Card, message, Tag} from "antd";
+import {addUsingPost} from "@/services/swagger/scaleController";
 
 const SysMenu: React.FC = () => {
   const location = useLocation();
@@ -131,17 +132,17 @@ const SysMenu: React.FC = () => {
     json = JSON.parse(selectedOptions?.scaleJson)
   }
   //提交方法
-  // const handleSubmit = async (values) => {
-  //   try {
-  //     const res = await addUsingPost({resId: id, tag: 1, scaleJson: JSON.stringify(values)});
-  //     if (res.data) {
-  //       message.success('提交成功');
-  //       history.back()
-  //     }
-  //   } catch (e) {
-  //     message.error('提交失败');
-  //   }
-  // }
+  const handleSubmit = async (values) => {
+    try {
+      const res = await addUsingPost({detailsId: id, tag: 1, scaleJson: JSON.stringify(values)});
+      if (res.data) {
+        message.success('提交成功');
+        history.back()
+      }
+    } catch (e) {
+      message.error('提交失败');
+    }
+  }
 
   const back = () => {
     history.back()
@@ -151,13 +152,9 @@ const SysMenu: React.FC = () => {
     <>
       <PageContainer
         header={{breadcrumb: {}}}
-        token={{
-          paddingInlinePageContainerContent: 0,
-          paddingBlockPageContainerContent: 0,
-        }}
         title={false}
       >
-        <Card style={{width: '80%', margin: '0 auto'}}>
+        <Card style={{width: '80%', margin: '0 auto' , height : '100%'}}>
           <div style={{textAlign: 'center', fontSize: '20px', fontWeight: 'bold', marginBottom: '32px'}}>心理筛查</div>
           <div style={{textAlign: 'center', marginBottom: '32px'}}>
             {selectedOptions?.scaleSuggest && (
@@ -175,7 +172,7 @@ const SysMenu: React.FC = () => {
 
               ),
             }}
-            // onFinish={async (values) => handleSubmit(values)}
+            onFinish={async (values) => handleSubmit(values)}
             initialValues={json}
           >
             {questions.map((question, index) => (

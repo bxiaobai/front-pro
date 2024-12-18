@@ -30,7 +30,6 @@ export const errorConfig: RequestConfig = {
     (response) => {
       // 请求地址
       const requestPath: string = response.config.url ?? '';
-
       // 响应
       const { data } = response as unknown as ResponseStructure;
       if (!data) {
@@ -42,7 +41,8 @@ export const errorConfig: RequestConfig = {
       if (
         code === 40100 &&
         !requestPath.includes('user/get/login') &&
-        !location.pathname.includes('/user/login')
+        !location.pathname.includes('/user/login') &&
+        !location.pathname.includes('/reac/card')
       ) {
         // 跳转至登录页
         window.location.href = `/user/login?redirect=${window.location.href}`;

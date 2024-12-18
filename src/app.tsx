@@ -12,6 +12,8 @@ import {MenuFoldOutlined, MenuUnfoldOutlined} from "@ant-design/icons";
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
+//不等于医生预约
+const dockerApt = '/reac/card';
 
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
@@ -23,7 +25,7 @@ export async function getInitialState(): Promise<InitialState> {
   };
   // 如果不是登录页面，执行
   const {location} = history;
-  if (location.pathname !== loginPath) {
+  if (location.pathname !== loginPath && location.pathname !== dockerApt) {
     try {
       const res = await getLoginUserUsingGet();
       initialState.currentUser = res.data;
